@@ -1,0 +1,164 @@
+// CineFlow AI — Agentic Production Operations Assistant
+// Demo data model for film/media production operations.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Production domain
+// ---------------------------------------------------------------------------
+
+model Workflow {
+  id               String   @id @default(cuid())
+  key              String   @unique
+  name             String
+  phase            String // PRE_PRODUCTION | PRODUCTION | POST_PRODUCTION | DISTRIBUTION
+  description      String
+  health           String // HEALTHY | WARNING | CRITICAL
+  stage            String
+  activeJobs       Int      @default(0)
+  latencyMs        Int      @default(0)
+  failureRate      Float    @default(0)
+  queueDepth       Int      @default(0)
+  throughputPerMin Int      @default(0)
+  lastUpdate       DateTime @default(now())
+  sortOrder        Int      @default(0)
+}
+
+model Metric {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  name         String
+  category     String // COMPUTE | QUEUE | RELIABILITY | STORAGE
+  description  String
+  value        Float
+  unit         String
+  status       String // HEALTHY | WARNING | CRITICAL
+  warnAbove    Float?
+  critAbove    Float?
+  targetValue  Float?
+  badDirection String   @default("above") // "above" = high is bad, "below" = low is bad
+  history      String // JSON number[] sparkline
+  updatedAt    DateTime @default(now())
+}
+
+// Mutable runtime state (worker counts, scenario flags, baselines)
+model SystemState {
+  key       String   @id
+  value     String
+  updatedAt DateTime @default(now())
+}
+
+model Incident {
+  id              String           @id // e.g. INC-1042
+  title           String
+  description     String
+  severity        String // HIGH | MEDIUM | LOW
+  service         String
+  workflowKey     String?
+  status          String // INVESTIGATING | AWAITING_APPROVAL | REMEDIATING | MONITORING | RESOLVED
+  detectedAt      DateTime
+  resolvedAt      DateTime?
+  agentConfidence Int?
+  rootCause       String?
+  resolutionNote  String?
+  events          IncidentEvent[]
+}
+
+model IncidentEvent {
+  id         String   @id @default(cuid())
+  incidentId String
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  ts         DateTime
+  kind       String // ANOMALY | AGENT | EVIDENCE | ROOT_CAUSE | RECOMMENDATION | HUMAN | ACTION | VERIFICATION | NOTE
+  label      String
+  detail     String?
+}
+
+model Deployment {
+  id          String   @id @default(cuid())
+  service     String
+  version     String
+  description String
+  deployedAt  DateTime
+}
+
+model LogEntry {
+  id      String   @id @default(cuid())
+  service String
+  level   String // INFO | WARN | ERROR
+  message String
+  ts      DateTime
+}
+
+// ---------------------------------------------------------------------------
+// Agent domain
+// ---------------------------------------------------------------------------
+
+model AgentRun {
+  id               String          @id @default(cuid())
+  query            String
+  intent           String // render_delay | status_summary | free_form
+  status           String // RUNNING | AWAITING_APPROVAL | EXECUTING | COMPLETED | REJECTED | FAILED
+  mode             String // DEMO | GEMINI
+  incidentId       String?
+  recommendationId String?
+  confidence       Int?
+  summary          String?
+  createdAt        DateTime        @default(now())
+  completedAt      DateTime?
+  steps            AgentRunStep[]
+}
+
+model AgentRunStep {
+  id          String    @id @default(cuid())
+  runId       String
+  run         AgentRun  @relation(fields: [runId], references: [id], onDelete: Cascade)
+  seq         Int
+  phase       String // UNDERSTAND | COLLECT | ANALYZE | ROOT_CAUSE | CONFIDENCE | RISK | RECOMMEND | APPROVAL | ACTION | VERIFY | RESOLVE | REPORT
+  title       String
+  detail      String?
+  tool        String?
+  toolStatus  String? // RUNNING | COMPLETED | FAILED
+  evidence    String? // JSON payload
+  status      String // PENDING | RUNNING | COMPLETED | SKIPPED
+  executeAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model Recommendation {
+  id           String    @id @default(cuid())
+  incidentId   String?
+  agentRunId  String?
+  title        String
+  problem      String
+  evidence     String // JSON array of { label, value, source }
+  analysis     String
+  rootCause    String
+  actionType   String // SCALE_RENDER_WORKERS | RESTART_CACHE_WARMER | ...
+  actionLabel  String
+  actionParams String // JSON
+  confidence   Int
+  risk         String // LOW | MEDIUM | HIGH
+  status       String // PENDING | APPROVED | REJECTED | EXECUTED | VERIFIED
+  createdAt    DateTime  @default(now())
+  decidedAt    DateTime?
+  executedAt   DateTime?
+  verifiedAt   DateTime?
+  verification String? // JSON verification result
+}
+
+model DemoScenario {
+  id        String   @id // "render_delay"
+  status    String // IDLE | RUNNING | AWAITING_APPROVAL | REMEDIATING | RESOLVED
+  runCount  Int      @default(0)
+  lastRunId String?
+  updatedAt DateTime @default(now())
+}

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="cf-gradient" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="50%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+    <linearGradient id="cf-accent" x1="18" y1="18" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA" />
+      <stop offset="100%" stop-color="#A78BFA" />
+    </linearGradient>
+    <filter id="cf-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#2563EB" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Base App Tile -->
+  <rect width="64" height="64" rx="14" fill="#0B0F19" />
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="13.25" stroke="#1E293B" stroke-width="1.5" />
+
+  <!-- Background Ambient Glow -->
+  <circle cx="32" cy="32" r="18" fill="#3B82F6" opacity="0.12" />
+
+  <!-- Outer Film Reel Rim / Flow Track -->
+  <path
+    d="M32 10C19.85 10 10 19.85 10 32C10 44.15 19.85 54 32 54C40.6 54 48.06 49.07 51.68 41.87"
+    stroke="url(#cf-gradient)"
+    stroke-width="3"
+    stroke-linecap="round"
+    filter="url(#cf-glow)"
+  />
+
+  <!-- Sprocket Holes on Film Track -->
+  <rect x="14" y="22" width="2.5" height="4" rx="1" fill="#38BDF8" opacity="0.85" />
+  <rect x="14" y="38" width="2.5" height="4" rx="1" fill="#38BDF8" opacity="0.85" />
+  <rect x="22" y="13.5" width="4" height="2.5" rx="1" fill="#38BDF8" opacity="0.85" />
+  <rect x="38" y="13.5" width="4" height="2.5" rx="1" fill="#38BDF8" opacity="0.85" />
+  <rect x="22" y="48" width="4" height="2.5" rx="1" fill="#818CF8" opacity="0.85" />
+  <rect x="38" y="48" width="4" height="2.5" rx="1" fill="#818CF8" opacity="0.85" />
+
+  <!-- Dynamic Agentic Flow: Central Möbius Ribbon & Play / Forward Wedge -->
+  <path
+    d="M23 23L45 32L23 41V23Z"
+    fill="url(#cf-gradient)"
+    stroke="url(#cf-accent)"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Neural Flow Pulse Rings -->
+  <circle cx="45" cy="32" r="3.5" fill="#38BDF8" />
+  <circle cx="45" cy="32" r="6" stroke="#38BDF8" stroke-width="1" stroke-opacity="0.4" />
+</svg>
